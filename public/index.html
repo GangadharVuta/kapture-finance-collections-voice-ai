@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kapture Finance - Maya Voice AI Collections Agent</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --card-bg: rgba(22, 31, 49, 0.75);
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #090d16);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 36px;
+    }
+
+    .agent-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-wrapper {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+    }
+
+    .avatar-wrapper svg {
+      width: 50px;
+      height: 50px;
+      fill: #ffffff;
+    }
+
+    .pulse-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 2px solid var(--accent-cyan);
+      opacity: 0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .call-btn {
+      background: linear-gradient(135deg, #2563eb, #0284c7);
+      color: white;
+      border: none;
+      padding: 16px 36px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .call-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.6);
+    }
+
+    .call-btn.active {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.4);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      text-align: left;
+      margin-top: 20px;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-box label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .info-box span {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .transcript-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 20px;
+      height: 180px;
+      overflow-y: auto;
+      text-align: left;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 20px;
+    }
+
+    .transcript-line {
+      margin-bottom: 8px;
+    }
+
+    .transcript-line strong {
+      color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="badge">KAPTURE FINANCE • VOICE AI DEMO</div>
+    <h1>Meet Maya — AI Collections Agent</h1>
+    <p class="subtitle">Automated, compliant, low-latency Voice AI debt resolution agent</p>
+
+    <div class="agent-card">
+      <div class="avatar-wrapper">
+        <div class="pulse-ring"></div>
+        <svg viewBox="0 0 24 24">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+      </div>
+
+      <div class="status-pill" id="statusPill">
+        <div class="status-dot"></div>
+        <span id="statusText">Server Online • Ready to Connect</span>
+      </div>
+
+      <button class="call-btn" id="callBtn" onclick="toggleCall()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+        <span id="btnText">Start Voice Call with Maya</span>
+      </button>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <label>Target Customer</label>
+          <span>Rahul Sharma</span>
+        </div>
+        <div class="info-box">
+          <label>Overdue Balance</label>
+          <span>₹8,499 (12 Days)</span>
+        </div>
+        <div class="info-box">
+          <label>Auth Code</label>
+          <span>4321</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="transcript-box" id="transcriptBox">
+      <div class="transcript-line"><strong>System:</strong> Server active. Click button above to initiate voice call session.</div>
+    </div>
+  </div>
+
+  <!-- Vapi Web SDK -->
+  <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+  <script>
+    let vapi = null;
+    let isCalling = false;
+
+    // Vapi Assistant ID from dashboard
+    const ASSISTANT_ID = "0b45d709-9a25-4703-84c9-e05985c4d949";
+    const PUBLIC_KEY = "3b08e7df-88c9-4a94-82a8-f542459b9213"; // Standard Vapi web key
+
+    function appendTranscript(role, text) {
+      const box = document.getElementById('transcriptBox');
+      const div = document.createElement('div');
+      div.className = 'transcript-line';
+      div.innerHTML = `<strong>${role}:</strong> ${text}`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function toggleCall() {
+      const btn = document.getElementById('callBtn');
+      const btnText = document.getElementById('btnText');
+      const statusText = document.getElementById('statusText');
+
+      if (!isCalling) {
+        // Start Call
+        isCalling = true;
+        btn.classList.add('active');
+        btnText.innerText = "End Voice Call";
+        statusText.innerText = "Call Connected • Speaking with Maya";
+        appendTranscript("System", "Initiating call session with Maya...");
+
+        if (window.vapiSDK) {
+          vapi = window.vapiSDK.run({
+            apiKey: PUBLIC_KEY,
+            assistant: ASSISTANT_ID
+          });
+        }
+      } else {
+        // End Call
+        isCalling = false;
+        btn.classList.remove('active');
+        btnText.innerText = "Start Voice Call with Maya";
+        statusText.innerText = "Call Completed • Server Online";
+        appendTranscript("System", "Voice call terminated cleanly.");
+
+        if (vapi) {
+          vapi.stop();
+        }
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+[
+  {
+    "scenario_id": "TEST_01_HAPPY_PATH_PTP",
+    "name": "Happy Path - Identity Verified & Promise to Pay Collected",
+    "description": "Customer confirms identity with code '4321', agrees to pay ₹8499 by 2026-08-20, receives payment link, and disposition PTP_COLLECTED is logged.",
+    "tool_calls": [
+      {
+        "name": "verify_customer",
+        "arguments": { "customer_id": "CUST_88392", "verification_code": "4321" },
+        "expected_status": "success",
+        "expected_verified": true
+      },
+      {
+        "name": "log_promise_to_pay",
+        "arguments": { "customer_id": "CUST_88392", "ptp_date": "2026-08-20", "ptp_amount": 8499, "payment_channel": "UPI_LINK" },
+        "expected_status": "success"
+      },
+      {
+        "name": "send_payment_link",
+        "arguments": { "customer_id": "CUST_88392", "phone_number": "+919876543210", "amount": 8499 },
+        "expected_status": "success"
+      },
+      {
+        "name": "mark_disposition",
+        "arguments": { "customer_id": "CUST_88392", "disposition": "PTP_COLLECTED", "notes": "Agreed to pay full amount by 20th Aug" },
+        "expected_status": "success"
+      }
+    ]
+  },
+  {
+    "scenario_id": "TEST_02_AUTH_FAILURE",
+    "name": "Edge Case - Verification Code Failure",
+    "description": "Customer provides wrong verification code '9999'. Agent fails verification and terminates call without disclosing debt.",
+    "tool_calls": [
+      {
+        "name": "verify_customer",
+        "arguments": { "customer_id": "CUST_88392", "verification_code": "9999" },
+        "expected_status": "failed",
+        "expected_verified": false
+      }
+    ]
+  },
+  {
+    "scenario_id": "TEST_03_ALREADY_PAID",
+    "name": "Edge Case - Payment Already Claimed",
+    "description": "Customer claims payment was made yesterday via UPI. Agent logs ALREADY_PAID disposition and advises processing window.",
+    "tool_calls": [
+      {
+        "name": "verify_customer",
+        "arguments": { "customer_id": "CUST_88392", "verification_code": "4321" },
+        "expected_status": "success"
+      },
+      {
+        "name": "mark_disposition",
+        "arguments": { "customer_id": "CUST_88392", "disposition": "ALREADY_PAID", "notes": "Customer claims paid yesterday via UPI Ref UTR998822" },
+        "expected_status": "success"
+      }
+    ]
+  },
+  {
+    "scenario_id": "TEST_04_DISPUTE_ESCALATION",
+    "name": "Edge Case - Debt Dispute Escalation",
+    "description": "Customer disputes penalty interest fees. Agent logs dispute and escalates call to human supervisor.",
+    "tool_calls": [
+      {
+        "name": "verify_customer",
+        "arguments": { "customer_id": "CUST_88392", "verification_code": "4321" },
+        "expected_status": "success"
+      },
+      {
+        "name": "escalate_to_agent",
+        "arguments": { "customer_id": "CUST_88392", "reason": "DEBT_DISPUTE", "call_summary": "Customer disputes late fee charges" },
+        "expected_status": "success"
+      },
+      {
+        "name": "mark_disposition",
+        "arguments": { "customer_id": "CUST_88392", "disposition": "DISPUTE", "notes": "Disputed interest charges, escalated to agent" },
+        "expected_status": "success"
+      }
+    ]
+  },
+  {
+    "scenario_id": "TEST_05_DO_NOT_CALL",
+    "name": "Compliance - Do Not Call Request",
+    "description": "Customer requests opt-out / DNC. Agent immediately logs DO_NOT_CALL disposition and ends call.",
+    "tool_calls": [
+      {
+        "name": "mark_disposition",
+        "arguments": { "customer_id": "CUST_88392", "disposition": "DO_NOT_CALL", "notes": "Customer requested DNC opt-out" },
+        "expected_status": "success"
+      }
+    ]
+  }
+]

@@ -1,0 +1,138 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "verify_customer",
+      "description": "Authenticates the customer using the last 4 digits of PAN, Aadhaar, or Date of Birth prior to debt disclosure.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "description": "Unique customer identifier (e.g., CUST_88392)"
+          },
+          "verification_code": {
+            "type": "string",
+            "description": "The 4-digit verification code or PIN provided by the customer"
+          }
+        },
+        "required": ["customer_id", "verification_code"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "log_promise_to_pay",
+      "description": "Records a binding Promise-to-Pay (PTP) date and committed amount in the collection database.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "description": "Unique customer identifier"
+          },
+          "ptp_date": {
+            "type": "string",
+            "description": "Agreed payment commitment date in YYYY-MM-DD format"
+          },
+          "ptp_amount": {
+            "type": "number",
+            "description": "Committed payment amount in INR"
+          },
+          "payment_channel": {
+            "type": "string",
+            "description": "Preferred payment mode (e.g., UPI_LINK, NETBANKING, CARD)"
+          }
+        },
+        "required": ["customer_id", "ptp_date", "ptp_amount"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "send_payment_link",
+      "description": "Triggers an instant payment link dispatch via SMS and WhatsApp to the customer's mobile number.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "description": "Unique customer identifier"
+          },
+          "phone_number": {
+            "type": "string",
+            "description": "Customer mobile phone number with country code"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Payment link amount in INR"
+          }
+        },
+        "required": ["customer_id", "phone_number", "amount"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "escalate_to_agent",
+      "description": "Transfers the call to a human collection supervisor or grievance officer.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "description": "Unique customer identifier"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for escalation (e.g., DEBT_DISPUTE, HARDSHIP_SETTLEMENT, AGENT_REQUEST)"
+          },
+          "call_summary": {
+            "type": "string",
+            "description": "Brief summary of conversation context for the human agent"
+          }
+        },
+        "required": ["customer_id", "reason"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "mark_disposition",
+      "description": "Logs the final call disposition status and agent notes in the CRM.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "customer_id": {
+            "type": "string",
+            "description": "Unique customer identifier"
+          },
+          "disposition": {
+            "type": "string",
+            "enum": [
+              "PTP_COLLECTED",
+              "ALREADY_PAID",
+              "DISPUTE",
+              "HARDSHIP",
+              "DO_NOT_CALL",
+              "WRONG_NUMBER",
+              "NO_INPUT",
+              "ABUSIVE_TERMINATION",
+              "ESCALATED"
+            ],
+            "description": "Categorized call outcome disposition status"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Detailed notes on call outcome and customer commitment"
+          }
+        },
+        "required": ["customer_id", "disposition", "notes"]
+      }
+    }
+  }
+]

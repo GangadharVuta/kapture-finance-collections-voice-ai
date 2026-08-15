@@ -1,0 +1,45 @@
+{
+  "name": "Maya - Kapture Finance Voice AI Collections Agent",
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "en-US",
+    "smart_format": true,
+    "endpointing": 250
+  },
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "temperature": 0.1,
+    "maxTokens": 250,
+    "messages": [
+      {
+        "role": "system",
+        "content": "Refer to system_prompt.txt for full detailed instruction payload."
+      }
+    ]
+  },
+  "voice": {
+    "provider": "elevenlabs",
+    "voiceId": "21m00Tcm4TlvDq8ikWAM",
+    "model": "eleven_turbo_v2",
+    "stability": 0.5,
+    "similarityBoost": 0.75
+  },
+  "firstMessage": "Hello, this is Maya calling from Kapture Finance. Am I speaking with Mr. Rahul Sharma?",
+  "firstMessageMode": "assistant-speaks-first",
+  "hipaaEnabled": false,
+  "clientMessages": [
+    "transcript",
+    "hang",
+    "tool-calls",
+    "speech-update"
+  ],
+  "serverMessages": [
+    "tool-calls",
+    "end-of-call-report"
+  ],
+  "endOfCallReportEnabled": true,
+  "maxDurationSeconds": 300,
+  "silenceTimeoutSeconds": 30
+}
