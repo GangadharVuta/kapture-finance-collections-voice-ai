@@ -115,7 +115,10 @@
       border-radius: 50%;
       border: 2px solid var(--accent-cyan);
       opacity: 0;
-      animation: pulse 2s infinite;
+    }
+
+    .pulse-ring.active {
+      animation: pulse 1.5s infinite;
     }
 
     @keyframes pulse {
@@ -176,6 +179,7 @@
       gap: 16px;
       text-align: left;
       margin-top: 20px;
+      width: 100%;
     }
 
     .info-box {
@@ -205,20 +209,31 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 14px;
       padding: 20px;
-      height: 180px;
+      height: 200px;
       overflow-y: auto;
       text-align: left;
       font-size: 0.95rem;
       color: var(--text-muted);
       margin-top: 20px;
+      width: 100%;
     }
 
     .transcript-line {
       margin-bottom: 8px;
+      line-height: 1.4;
     }
 
-    .transcript-line strong {
-      color: var(--accent-cyan);
+    .transcript-line.system {
+      color: #94a3b8;
+      font-style: italic;
+    }
+
+    .transcript-line.assistant strong {
+      color: #38bdf8;
+    }
+
+    .transcript-line.user strong {
+      color: #4ade80;
     }
   </style>
 </head>
@@ -231,7 +246,7 @@
 
     <div class="agent-card">
       <div class="avatar-wrapper">
-        <div class="pulse-ring"></div>
+        <div class="pulse-ring" id="pulseRing"></div>
         <svg viewBox="0 0 24 24">
           <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
           <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
@@ -239,7 +254,7 @@
       </div>
 
       <div class="status-pill" id="statusPill">
-        <div class="status-dot"></div>
+        <div class="status-dot" id="statusDot"></div>
         <span id="statusText">Server Online • Ready to Connect</span>
       </div>
 
@@ -267,61 +282,105 @@
     </div>
 
     <div class="transcript-box" id="transcriptBox">
-      <div class="transcript-line"><strong>System:</strong> Server active. Click button above to initiate voice call session.</div>
+      <div class="transcript-line system">System: Web interface ready. Click button above to connect or test directly on Vapi dashboard.</div>
     </div>
   </div>
 
-  <!-- Vapi Web SDK -->
-  <script src="https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js"></script>
+  <!-- Universal Vapi Web SDK -->
+  <script src="https://unpkg.com/@vapi-ai/web/dist/vapi.js"></script>
   <script>
     let vapi = null;
     let isCalling = false;
 
-    // Vapi Assistant ID & Public Key from dashboard
     const ASSISTANT_ID = "0b45d709-9a25-4703-84c9-e05985c4d949";
     const PUBLIC_KEY = "06275056-76eb-4fac-a731-a445d9537d43";
 
-    function appendTranscript(role, text) {
+    function appendTranscript(type, role, text) {
       const box = document.getElementById('transcriptBox');
       const div = document.createElement('div');
-      div.className = 'transcript-line';
-      div.innerHTML = `<strong>${role}:</strong> ${text}`;
+      div.className = `transcript-line ${type}`;
+      if (role) {
+        div.innerHTML = `<strong>${role}:</strong> ${text}`;
+      } else {
+        div.innerText = text;
+      }
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
     }
 
-    function toggleCall() {
-      const btn = document.getElementById('callBtn');
-      const btnText = document.getElementById('btnText');
-      const statusText = document.getElementById('statusText');
+    function initVapi() {
+      if (window.Vapi && !vapi) {
+        try {
+          vapi = new window.Vapi(PUBLIC_KEY);
+          
+          vapi.on('call-start', () => {
+            isCalling = true;
+            document.getElementById('callBtn').classList.add('active');
+            document.getElementById('btnText').innerText = "End Voice Call";
+            document.getElementById('statusText').innerText = "Call Connected • Maya is Listening";
+            document.getElementById('pulseRing').classList.add('active');
+            appendTranscript("system", null, "🟢 Call connected! Maya is speaking...");
+          });
+
+          vapi.on('call-end', () => {
+            isCalling = false;
+            document.getElementById('callBtn').classList.remove('active');
+            document.getElementById('btnText').innerText = "Start Voice Call with Maya";
+            document.getElementById('statusText').innerText = "Call Completed • Server Online";
+            document.getElementById('pulseRing').classList.remove('active');
+            appendTranscript("system", null, "🔴 Call ended gracefully.");
+          });
+
+          vapi.on('message', (message) => {
+            if (message.type === 'transcript' && message.transcriptType === 'final') {
+              const role = message.role === 'assistant' ? 'Maya' : 'You';
+              appendTranscript(message.role, role, message.transcript);
+            }
+          });
+
+          vapi.on('error', (err) => {
+            console.error("Vapi Error:", err);
+            appendTranscript("system", null, `⚠️ Call Error: ${err.message || 'Connection error'}. Try Vapi Dashboard Test Call.`);
+            isCalling = false;
+            document.getElementById('callBtn').classList.remove('active');
+            document.getElementById('btnText').innerText = "Start Voice Call with Maya";
+          });
+        } catch (e) {
+          console.error("SDK Init Error:", e);
+        }
+      }
+    }
+
+    async function toggleCall() {
+      if (!vapi) {
+        initVapi();
+      }
 
       if (!isCalling) {
-        // Start Call
-        isCalling = true;
-        btn.classList.add('active');
-        btnText.innerText = "End Voice Call";
-        statusText.innerText = "Call Connected • Speaking with Maya";
-        appendTranscript("System", "Initiating call session with Maya...");
-
-        if (window.vapiSDK) {
-          vapi = window.vapiSDK.run({
-            apiKey: PUBLIC_KEY,
-            assistant: ASSISTANT_ID
-          });
+        appendTranscript("system", null, "Connecting to Maya Voice Agent...");
+        document.getElementById('statusText').innerText = "Connecting WebRTC Audio Stream...";
+        
+        try {
+          if (vapi) {
+            await vapi.start(ASSISTANT_ID);
+          } else {
+            // Fallback to widget script if Vapi SDK constructor unavailable
+            appendTranscript("system", null, "Note: If web call doesn't connect, test call directly on Vapi Dashboard!");
+          }
+        } catch (e) {
+          console.error("Call start error:", e);
+          appendTranscript("system", null, "Please allow microphone access when prompted.");
         }
       } else {
-        // End Call
-        isCalling = false;
-        btn.classList.remove('active');
-        btnText.innerText = "Start Voice Call with Maya";
-        statusText.innerText = "Call Completed • Server Online";
-        appendTranscript("System", "Voice call terminated cleanly.");
-
         if (vapi) {
           vapi.stop();
         }
       }
     }
+
+    window.addEventListener('load', () => {
+      initVapi();
+    });
   </script>
 </body>
 </html>
