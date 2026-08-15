@@ -19,10 +19,26 @@ app.use((req, res, next) => {
   next();
 });
 
-// Static Web UI Middleware
-app.use(express.static('public'));
+const path = require('path');
 
-// Root API Endpoint (if requested as JSON)
+// Static Web UI Middleware
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Root Endpoint (Serves Web UI or Status JSON)
+app.get('/', (req, res) => {
+  const indexPath = path.join(__dirname, 'public', 'index.html');
+  if (require('fs').existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.status(200).json({
+    status: 'ONLINE',
+    service: 'Maya Kapture Finance Collections Agent Webhook Server',
+    webhookUrl: '/webhook',
+    healthUrl: '/health'
+  });
+});
+
+// Root API Endpoint
 app.get('/api/status', (req, res) => {
   res.status(200).json({
     status: 'ONLINE',
